@@ -11,7 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ClippingMediaSource
 import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.exoplayer.upstream.DefaultDataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.ui.PlayerView
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.common.EventChannel
@@ -19,7 +19,7 @@ import io.flutter.plugin.common.EventChannel
 class SegmentsVideoPlayerView(private val context: Context) : PlatformView {
     private val playerView: PlayerView = PlayerView(context)
     private var player: ExoPlayer? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private val mainHandler: Handler = Handler(Looper.getMainLooper())
     private var eventSink: EventChannel.EventSink? = null
 
     init {
@@ -45,18 +45,18 @@ class SegmentsVideoPlayerView(private val context: Context) : PlatformView {
             throw IllegalArgumentException("Segments list is empty or null")
         }
 
-        val dataSourceFactory = DefaultDataSource.Factory(context)
+        val dataSourceFactory: DefaultDataSource.Factory = DefaultDataSource.Factory(context)
 
-        val concatenatedSource = ConcatenatingMediaSource()
+        val concatenatedSource: ConcatenatingMediaSource = ConcatenatingMediaSource()
         for (segment in segments) {
-            val path = segment["path"] as String
-            val startSeconds = (segment["start"] as Number).toDouble()
-            val endSeconds = (segment["end"] as Number).toDouble()
+            val path: String = segment["path"] as String
+            val startSeconds: Double = (segment["start"] as Number).toDouble()
+            val endSeconds: Double = (segment["end"] as Number).toDouble()
 
-            val startMs = (startSeconds * 1000).toLong()
-            val endMs = (endSeconds * 1000).toLong()
+            val startMs: Long = (startSeconds * 1000).toLong()
+            val endMs: Long = (endSeconds * 1000).toLong()
 
-            val mediaSource = ClippingMediaSource(
+            val mediaSource: ClippingMediaSource = ClippingMediaSource(
                 ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(MediaItem.fromUri(Uri.parse(path))),
                 startMs, endMs
@@ -85,11 +85,13 @@ class SegmentsVideoPlayerView(private val context: Context) : PlatformView {
         this.eventSink = eventSink
     }
 
-    private val updateProgressAction = Runnable {
-        player?.let {
-            val position = it.currentPosition
-            eventSink?.success(position)
-            mainHandler.postDelayed(updateProgressAction, 1000)
+    private val updateProgressAction: Runnable = object : Runnable {
+        override fun run() {
+            player?.let {
+                val position: Long = it.currentPosition
+                eventSink?.success(position)
+                mainHandler.postDelayed(this, 1000)
+            }
         }
     }
 

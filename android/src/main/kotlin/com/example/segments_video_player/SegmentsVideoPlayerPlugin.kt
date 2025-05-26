@@ -9,6 +9,9 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.platform.PlatformViewRegistry
+import com.example.segmentsvideoplayer.SegmentsVideoPlayerView
+import com.example.segmentsvideoplayer.SegmentsVideoPlayerViewFactory
+
 
 class SegmentsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
     private lateinit var methodChannel: MethodChannel
