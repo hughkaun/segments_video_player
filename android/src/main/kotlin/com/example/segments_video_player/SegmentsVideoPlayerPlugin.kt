@@ -1,108 +1,88 @@
-package com.example.segmentsvideoplayer;
+package com.example.segmentsvideoplayer
 
-import android.content.Context;
+import android.content.Context
+import androidx.annotation.NonNull
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.platform.PlatformViewRegistry
 
-import androidx.annotation.NonNull;
+class SegmentsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
+    private lateinit var methodChannel: MethodChannel
+    private lateinit var eventChannel: EventChannel
+    private lateinit var playerView: SegmentsVideoPlayerView
+    private lateinit var context: Context
 
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.plugin.common.EventChannel;
-import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.platform.PlatformViewRegistry;
+    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        context = flutterPluginBinding.applicationContext
+        playerView = SegmentsVideoPlayerView(context)
 
-import java.util.List;
-import java.util.Map;
+        methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "segments_video_player")
+        eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "segments_video_player_events")
 
-public class SegmentsVideoPlayerPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
-    private MethodChannel methodChannel;
-    private EventChannel eventChannel;
-    private SegmentsVideoPlayerView playerView;
-    private Context context;
+        methodChannel.setMethodCallHandler(this)
+        eventChannel.setStreamHandler(this)
 
-    @Override
-    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        context = flutterPluginBinding.getApplicationContext();
-        playerView = new SegmentsVideoPlayerView(context);
-
-        methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "segments_video_player");
-        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "segments_video_player_events");
-
-        methodChannel.setMethodCallHandler(this);
-        eventChannel.setStreamHandler(this);
-
-        PlatformViewRegistry registry = flutterPluginBinding.getPlatformViewRegistry();
-        registry.registerViewFactory("segments_video_player_view", new SegmentsVideoPlayerViewFactory(context));
+        val registry: PlatformViewRegistry = flutterPluginBinding.platformViewRegistry
+        registry.registerViewFactory("segments_video_player_view", SegmentsVideoPlayerViewFactory(context))
     }
 
-    @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        switch (call.method) {
-            case "initialize":
-                initialize(call, result);
-                break;
-            case "play":
-                play(result);
-                break;
-            case "pause":
-                pause(result);
-                break;
-            case "dispose":
-                dispose(result);
-                break;
-            default:
-                result.notImplemented();
-                break;
+    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+        when (call.method) {
+            "initialize" -> initialize(call, result)
+            "play" -> play(result)
+            "pause" -> pause(result)
+            "dispose" -> dispose(result)
+            else -> result.notImplemented()
         }
     }
 
-    private void initialize(MethodCall call, Result result) {
-        List<Map<String, Object>> segments = call.argument("segments");
+    private fun initialize(call: MethodCall, result: Result) {
+        val segments = call.argument<List<Map<String, Any>>>("segments")
         try {
-            playerView.initialize(segments);
-            result.success(null);
-        } catch (IllegalArgumentException e) {
-            result.error("Invalid segments", e.getMessage(), null);
+            playerView.initialize(segments)
+            result.success(null)
+        } catch (e: IllegalArgumentException) {
+            result.error("Invalid segments", e.message, null)
         }
     }
 
-    private void play(Result result) {
+    private fun play(result: Result) {
         try {
-            playerView.play();
-            result.success(null);
-        } catch (IllegalStateException e) {
-            result.error("Player is not initialized", e.getMessage(), null);
+            playerView.play()
+            result.success(null)
+        } catch (e: IllegalStateException) {
+            result.error("Player is not initialized", e.message, null)
         }
     }
 
-    private void pause(Result result) {
+    private fun pause(result: Result) {
         try {
-            playerView.pause();
-            result.success(null);
-        } catch (IllegalStateException e) {
-            result.error("Player is not initialized", e.getMessage(), null);
+            playerView.pause()
+            result.success(null)
+        } catch (e: IllegalStateException) {
+            result.error("Player is not initialized", e.message, null)
         }
     }
 
-    private void dispose(Result result) {
-        playerView.dispose();
-        result.success(null);
+    private fun dispose(result: Result) {
+        playerView.dispose()
+        result.success(null)
     }
 
-    @Override
-    public void onListen(Object arguments, EventChannel.EventSink events) {
-        playerView.setEventSink(events);
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        playerView.setEventSink(events)
     }
 
-    @Override
-    public void onCancel(Object arguments) {
-        playerView.setEventSink(null);
+    override fun onCancel(arguments: Any?) {
+        playerView.setEventSink(null)
     }
 
-    @Override
-    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        methodChannel.setMethodCallHandler(null);
-        eventChannel.setStreamHandler(null);
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        methodChannel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
     }
 }
