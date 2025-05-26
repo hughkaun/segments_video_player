@@ -1,4 +1,4 @@
-package com.example.segments_video_player
+package com.example.segmentsvideoplayer
 
 import android.content.Context
 import androidx.annotation.NonNull
@@ -42,11 +42,15 @@ class SegmentsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, EventChannel
 
     private fun initialize(call: MethodCall, result: Result) {
         val segments = call.argument<List<Map<String, Any>>>("segments")
-        try {
-            playerView.initialize(segments)
-            result.success(null)
-        } catch (e: IllegalArgumentException) {
-            result.error("Invalid segments", e.message, null)
+        if (segments != null) {
+            try {
+                playerView.initialize(segments)
+                result.success(null)
+            } catch (e: IllegalArgumentException) {
+                result.error("Invalid segments", e.message, null)
+            }
+        } else {
+            result.error("Invalid arguments", "Segments cannot be null", null)
         }
     }
 
