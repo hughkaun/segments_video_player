@@ -1,4 +1,4 @@
-package com.example.segmentsvideoplayer
+package com.example.segments_video_player
 
 import android.content.Context
 import androidx.annotation.NonNull
@@ -9,8 +9,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.platform.PlatformViewRegistry
-import com.example.segmentsvideoplayer.SegmentsVideoPlayerView
-import com.example.segmentsvideoplayer.SegmentsVideoPlayerViewFactory
+import com.example.segments_video_player.SegmentsVideoPlayerView
+import com.example.segments_video_player.SegmentsVideoPlayerViewFactory
 
 
 class SegmentsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {

@@ -1,4 +1,4 @@
-package com.example.segmentsvideoplayer
+package com.example.segments_video_player
 
 import android.content.Context
 import io.flutter.plugin.platform.PlatformView
