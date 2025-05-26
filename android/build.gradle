@@ -27,7 +27,7 @@ apply plugin: "kotlin-android"
 android {
     namespace = "com.example.segments_video_player"
 
-    compileSdk = 35
+    compileSdk = 34
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
