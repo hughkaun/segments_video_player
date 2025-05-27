@@ -5,16 +5,20 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ClippingMediaSource
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.ui.PlayerView
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.common.EventChannel
+import java.io.File
 
 class SegmentsVideoPlayerView(private val context: Context) : PlatformView {
     private val playerView: PlayerView = PlayerView(context)
@@ -40,32 +44,36 @@ class SegmentsVideoPlayerView(private val context: Context) : PlatformView {
         }
     }
 
+    @OptIn(UnstableApi::class)
     fun initialize(segments: List<Map<String, Any>>) {
         if (segments.isEmpty()) {
             throw IllegalArgumentException("Segments list is empty or null")
         }
 
-        val dataSourceFactory: DefaultDataSource.Factory = DefaultDataSource.Factory(context)
+        val dataSourceFactory = DefaultDataSource.Factory(context)
+        val mediaSources = mutableListOf<MediaSource>()
 
-        val concatenatedSource: ConcatenatingMediaSource = ConcatenatingMediaSource()
         for (segment in segments) {
-            val path: String = segment["path"] as String
-            val startSeconds: Double = (segment["start"] as Number).toDouble()
-            val endSeconds: Double = (segment["end"] as Number).toDouble()
+            val path = segment["path"] as? String ?: throw IllegalArgumentException("Path is missing")
+            val startSeconds = (segment["start"] as? Number)?.toDouble() ?: throw IllegalArgumentException("Start time is missing")
+            val endSeconds = (segment["end"] as? Number)?.toDouble() ?: throw IllegalArgumentException("End time is missing")
 
-            val startMs: Long = (startSeconds * 1000).toLong()
-            val endMs: Long = (endSeconds * 1000).toLong()
+            val startMs = (1000 * 1000).toLong()
+            val endMs = (5000 * 1000).toLong()
 
-            val mediaSource: ClippingMediaSource = ClippingMediaSource(
+            val uri = Uri.fromFile(File(path))
+            val mediaSource = ClippingMediaSource(
                 ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(Uri.parse(path))),
+                    .createMediaSource(MediaItem.fromUri(uri)),
                 startMs, endMs
             )
-            concatenatedSource.addMediaSource(mediaSource)
+            mediaSources.add(mediaSource)
         }
 
+        val concatenatedSource = ConcatenatingMediaSource(*mediaSources.toTypedArray())
         player?.setMediaSource(concatenatedSource)
         player?.prepare()
+        player?.play()
     }
 
     fun play() {

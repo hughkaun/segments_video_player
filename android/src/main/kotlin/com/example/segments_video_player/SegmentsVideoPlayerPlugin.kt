@@ -30,7 +30,7 @@ class SegmentsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, EventChannel
         eventChannel.setStreamHandler(this)
 
         val registry: PlatformViewRegistry = flutterPluginBinding.platformViewRegistry
-        registry.registerViewFactory("segments_video_player_view", SegmentsVideoPlayerViewFactory(context))
+        registry.registerViewFactory("segments_video_player_view", SegmentsVideoPlayerViewFactory(playerView))
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
